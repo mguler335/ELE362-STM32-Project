@@ -2,49 +2,41 @@
 ![IMG_3965](https://github.com/user-attachments/assets/d2a52c39-e6a7-4d39-81fe-39b228a9c3c9)
 
 
-Bu depo, STM32 NUCLEO-F091RC geliştirme kartı kullanılarak gerçekleştirilmiş üç bağımsız gömülü sistem projesini içermektedir. Proje; UART haberleşmesi, analog-dijital dönüşümler (ADC/DAC), kesme tabanlı asansör kontrolü ve yapay zeka ile Mors kodu çözme konularını kapsamaktadır.
+# 🛠️ STM32 Embedded Systems: Peripheral Control, Elevator Logic & AI
 
-## 🚀 Proje İçeriği
+Bu proje, **TOBB ETÜ ELE 362 / BİL 326 Mikroişlemciler** dersi kapsamında STM32 NUCLEO-F091RC geliştirme kartı üzerinde gerçekleştirilmiş, birbirinden bağımsız üç farklı gömülü sistem projesini içermektedir.
+
+## 🚀 Proje İçerikleri
 
 ### 📡 Proje 1: UART, DAC ve ADC Senkronizasyonu
-Mikrodenetleyici üzerindeki farklı haberleşme ve analog birimlerin zamanlayıcılar (Timers) ile senkronize çalışmasını sağlar.
-* [cite_start]**UART Haberleşme:** USART3 üzerinden gönderilen 8-bitlik veriler USART1 üzerinden kesme (interrupt) modunda alınır[cite: 311, 312].
-* [cite_start]**DAC Kontrol:** Gelen verinin büyüklüğüne göre (0-255) DAC çıkışı 1V, 2V veya 3V seviyelerine ayarlanır[cite: 313].
-* [cite_start]**ADC Örnekleme:** DAC çıkışı, TIM3 zamanlayıcısının donanımsal tetiklemesiyle (Hardware Trigger) her 0.5 saniyede bir 8-bit çözünürlükte okunur[cite: 315].
+Mikrodenetleyici üzerindeki farklı haberleşme ve analog birimlerin zamanlayıcılar (Timers) ile uyumlu çalışmasını sağlar.
+* **Dizi Tanımlama:** 0-255 arası değerlerden oluşan 50 elemanlı bir veri seti kullanılır.
+* **UART Loopback:** USART3 (Verici) ve USART1 (Alıcı) birimleri birbirine bağlanarak veri iletimi sağlanır.
+* **Voltaj Kontrolü (DAC):** Alınan verinin değerine göre (0-100, 101-200, >200) DAC çıkışından sırasıyla 1V, 2V veya 3V gerilim üretilir.
+* **Hassas Okuma (ADC):** DAC çıkışı ADC girişine bağlanır ve TIM3 tetiklemesiyle her 0.5 saniyede bir okuma yapılır.
 
 ### 🛗 Proje 2: Akıllı Asansör Simülasyonu
-Keypad ve LED animasyonları kullanılarak 0-9 katları arasında çalışan bir asansör sistemidir.
-* [cite_start]**Ara Durak Mantığı:** Asansör bir yöne hareket ederken güzergah üzerindeki yeni talepleri önceliklendirir[cite: 270, 329].
-* [cite_start]**Zamanlama:** İşlemciyi kilitlemeyen (non-blocking) kesme tabanlı bir mimari kullanılmıştır[cite: 321].
-* [cite_start]**LED Durumları:** Yükselme (0.5 sn toggle), alçalma (0.2 sn toggle) ve durma (sabit yanma) durumları LED2 üzerinden izlenebilir[cite: 262, 263].
+Keypad ve LED animasyonları ile bir asansörün çalışma prensibini simüle eder.
+* **Hareket Mantığı:** 0-9 katları arasında hareket eden asansör, yükselirken 0.5 sn, alçalırken 0.2 sn aralıklarla LED yanıp sönerek (Toggle) durumunu belli eder.
+* **Akıllı Durak Sistemi:** Asansör hareket halindeyken güzergah üzerindeki yeni talepleri algılar. Örneğin 0'dan 7'ye çıkarken 5. kattan talep gelirse, önce 5. katta durur ve sonra hedefine devam eder.
+* **Zamanlama:** HAL_Delay yerine tamamen Timer Interrupt yapısı kullanılarak sistemin aynı anda hem buton okuması hem de hareket etmesi sağlanmıştır.
 
 ### 🧠 Proje 3: AI Tabanlı Mors Kodu Çözücü
-Gömülü bir derin öğrenme modeli (X-CUBE-AI) kullanarak buton sinyallerini gerçek zamanlı olarak metne dönüştürür.
-* [cite_start]**Derin Öğrenme:** Google Colab üzerinde eğitilen model, X-CUBE-AI eklentisi ile STM32'ye entegre edilmiştir[cite: 275, 276].
-* [cite_start]**Sınıflandırma:** Nokta, Çizgi, Çift Tıklama ve Boşluk olmak üzere 4 farklı giriş sınıflandırılır[cite: 283].
-* [cite_start]**Veri İşleme:** Her 25 ms'de bir örnekleme yapılarak 1 saniyelik pencereler halinde model girişi oluşturulur[cite: 284, 285].
+Gömülü bir derin öğrenme modeli (X-CUBE-AI) kullanarak buton sinyallerini metne dönüştürür.
+* **Derin Öğrenme Modeli:** Google Colab üzerinde eğitilen ve 4 farklı girişi (Nokta, Çizgi, Çift Tık, Boş) tanıyan model, STM32'ye entegre edilmiştir.
+* **Gerçek Zamanlı İşleme:** PC13 mavi butonu üzerinden her 25 ms'de bir örnek alınır ve 1 saniyelik veriler model tarafından analiz edilir.
+* **Cümle Çözümleme:** Boşluk sinyali harf sonunu, çift tıklama sinyali ise kelime sonunu ifade eder ve sonuç string olarak saklanır.
 
-## 🛠️ Donanım ve Yazılım Yapısı
-* [cite_start]**Kart:** STM32 NUCLEO-F091RC[cite: 274].
-* **IDE:** STM32CubeIDE.
-* [cite_start]**Eklenti:** X-CUBE-AI (Makine Öğrenmesi için)[cite: 288].
-* **Haberleşme:** UART (115200 Baud).
+## 🛠️ Teknik Detaylar
+* **Geliştirme Kartı:** STM32 NUCLEO-F091RC
+* **Yazılım Geliştirme:** STM32CubeIDE & X-CUBE-AI
+* **Haberleşme:** UART (115200 Baudrate)
+* **Zamanlayıcılar:** TIM3 (ADC ve Veri Toplama), TIM6 (UART Gönderimi)
 
-## 🔌 Pin Bağlantıları
-| Bileşen | Pin | Açıklama |
-| :--- | :--- | :--- |
-| **UART Verici (Tx)** | USART3 | [cite_start]Veri gönderimi [cite: 311] |
-| **UART Alıcı (Rx)** | USART1 | [cite_start]Veri alımı [cite: 312] |
-| **Buton** | PC13 | [cite_start]Mors kodu girişi (Mavi buton) [cite: 292] |
-| **LED** | PA5 | [cite_start]Asansör hareket durumu (LD2) [cite: 260] |
-| **DAC Çıkışı** | PA4 | Analog voltaj üretimi |
-
-## 📦 Kurulum ve Çalıştırma
-1. STM32CubeIDE projesini içe aktarın.
-2. `X-CUBE-AI` paketinin yüklü olduğundan emin olun.
-3. [cite_start]Proje 3 için eğitilen `.tflite` modelini eklenti üzerinden yükleyin[cite: 289].
-4. Kodu derleyin ve kartınıza yükleyin.
-5. [cite_start]`Debugger` ekranı üzerinden verileri ve asansörün anlık kat bilgisini izleyebilirsiniz[cite: 252, 267].
+## 🔌 Donanım Kurulumu
+1. **UART Bağlantısı:** USART3 Tx pinini USART1 Rx pinine fiziksel olarak bağlayın.
+2. **Analog Bağlantı:** PA4 (DAC Out) pinini PA0 (ADC In) pinine bir jumper kablo ile bağlayın.
+3. **Keypad:** Proje 2 için asansör hedef kat girişlerini yapacak keypad bağlantısını tamamlayın.
+4. **Debug:** Sonuçları ve kat bilgilerini izlemek için STM32CubeIDE üzerinden Debugger/Live Expressions ekranını kullanın.
 
 ---
-[cite_start]*Bu çalışma Muhammed Halil Güler tarafından TOBB ETÜ ELE 362 dersi kapsamında geliştirilmiştir.* [cite: 367]
